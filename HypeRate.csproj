@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <RootNamespace>HypeRate</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -10,5 +11,9 @@
         <Version>1.0.1</Version>
         <PackageProjectUrl>https://hyperate.io</PackageProjectUrl>
     </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+    </ItemGroup>
 
 </Project>
