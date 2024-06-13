@@ -1,14 +1,22 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO.Ports;
 using HypeRate;
 using HypeRate.EventArgs;
 
 class Program
 {
+    static SerialPort? _serialPort;
     static async Task Main(string[] args)
     {
         try{
+            // Initialize the serial port for Arduino communication
+            _serialPort = new SerialPort("/dev/cu.usbmodem11201", 9600); // Replace with your Arduino's port
+            _serialPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
+            _serialPort.Open();
+            Console.WriteLine("Successfully Opened Arduino Port");
+
             // Step 1: Initialize the HyperRate instance and set the API token
             var hypeRate = HypeRate.HypeRate.GetInstance();
             hypeRate.SetApiToken("mGZQK7sMnVCqShZ5xLfVIiUVZztZFS18xn1lMPykUPayIEVaEFTiW2cGhslqLNW7"); // Replace with your actual API token
@@ -48,6 +56,7 @@ class Program
 
             // Step 6: Disconnect from the server
             await hypeRate.Disconnect();
+            _serialPort.Close();
         }
         catch(Exception ex){
             Console.WriteLine($"An error occurred: {ex.Message}");
@@ -71,5 +80,22 @@ class Program
         // Debugging info
         Console.WriteLine($"Timestamp: {DateTime.Now}");
         Console.WriteLine($"EventArgs: DeviceId={e.Device}, Heartbeat={e.Heartbeat}");
+        SendPulseToArduino(e.Heartbeat);
+    }
+
+    private static void SendPulseToArduino(int heartbeat)
+    {
+        if (_serialPort.IsOpen)
+        {
+            _serialPort.WriteLine(heartbeat.ToString());
+        }
+    }
+
+    private static void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+    {
+        SerialPort sp = (SerialPort)sender;
+        string inData = sp.ReadExisting();
+        Console.WriteLine("Data Received:");
+        Console.WriteLine(inData);
     }
 }
